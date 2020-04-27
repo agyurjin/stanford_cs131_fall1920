@@ -20,7 +20,7 @@ def load(image_path):
 
     ### YOUR CODE HERE
     # Use skimage io.imread
-    pass
+    out = io.imread(image_path)
     ### END YOUR CODE
 
     # Let's convert the image to be between the correct range.
@@ -45,7 +45,7 @@ def dim_image(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out = 0.5*image**2
     ### END YOUR CODE
 
     return out
@@ -66,7 +66,7 @@ def convert_to_grey_scale(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out = color.rgb2gray(image)
     ### END YOUR CODE
 
     return out
@@ -86,7 +86,15 @@ def rgb_exclusion(image, channel):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out = color.gray2rgb(image.copy())
+    if channel == 'R':
+        out[:,:,0] = 0
+    elif channel == 'G':
+        out[:,:,1] = 0
+    elif channel == 'B':
+        out[:,:,2] = 0
+    else:
+        print("Unknown channel!")
     ### END YOUR CODE
 
     return out
@@ -107,7 +115,14 @@ def lab_decomposition(image, channel):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    if channel == "L":
+        out = lab[:,:,0]
+    elif channel == "A":
+        out = lab[:,:,1]
+    elif channel == 'B':
+        out = lab[:,:,2]
+    else:
+        print("Unknown channel!")
     ### END YOUR CODE
 
     return out
@@ -128,9 +143,15 @@ def hsv_decomposition(image, channel='H'):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    if channel == "H":
+        out = hsv[:,:,0]
+    elif channel == "S":
+        out = hsv[:,:,1]
+    elif channel == "V":
+        out = hsv[:,:,2]
+    else:
+        print("Unknown channel!")
     ### END YOUR CODE
-
     return out
 
 
@@ -154,7 +175,10 @@ def mix_images(image1, image2, channel1, channel2):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    h, w, c = image1.shape
+
+    out = rgb_exclusion(image1, channel1)
+    out[:,int(w/2):,:] = rgb_exclusion(image2,channel2)[:,int(w/2):,:]
     ### END YOUR CODE
 
     return out
@@ -183,7 +207,12 @@ def mix_quadrants(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    h, w, c = image.shape
+    out = image.copy()
+    out[:int(h/2),:int(w/2),:] = rgb_exclusion(image, "R")[:int(h/2),:int(w/2),:]
+    out[:int(h/2),int(w/2):,:] = dim_image(image)[:int(h/2),int(w/2):,:]
+    out[int(h/2):,:int(w/2),:] = np.sqrt(out[int(h/2):,:int(w/2),:])
+    out[int(h/2):,int(w/2):,:] = rgb_exclusion(image, "R")[int(h/2):,int(w/2):,:]
     ### END YOUR CODE
 
     return out
