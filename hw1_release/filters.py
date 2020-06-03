@@ -28,16 +28,13 @@ def conv_nested(image, kernel):
     Hk, Wk = kernel.shape
     out = np.zeros((Hi, Wi))
 
-    # kernel = np.flip(kernel)
     ### YOUR CODE HERE
     for m in range(Hi):
     	for n in range(Wi):
     		sum = 0
     		for i in range(Hk):
     			for j in range(Wk):
-    				if m+Hk//2-i < 0 or n+Wk//2-j < 0 or m+Hk//2-i>=Hi or n+Wk//2-j>=Wi:
-    					sum += 0
-    				else:
+    				if m+Hk//2-i >= 0 or n+Wk//2-j >= 0 or m+Hk//2-i < Hi or n+Wk//2-j < Wi:
     					sum += kernel[i][j]*image[m+Hk//2-i][n+Wk//2-j]
     		out[m][n] = sum 
     ### END YOUR CODE
