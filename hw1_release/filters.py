@@ -35,10 +35,10 @@ def conv_nested(image, kernel):
     		sum = 0
     		for i in range(Hk):
     			for j in range(Wk):
-    				if m+1-i < 0 or n+1-j < 0 or m+1-i>=Hi or n+1-j>=Wi:
+    				if m+Hk//2-i < 0 or n+Wk//2-j < 0 or m+Hk//2-i>=Hi or n+Wk//2-j>=Wi:
     					sum += 0
     				else:
-    					sum += kernel[i][j]*image[m+1-i][n+1-j]
+    					sum += kernel[i][j]*image[m+Hk//2-i][n+Wk//2-j]
     		out[m][n] = sum 
     ### END YOUR CODE
 
