@@ -45,7 +45,18 @@ def kmeans(features, k, num_iters=100):
 
     for n in range(num_iters):
         ### YOUR CODE HERE
-        pass
+        new_assignments = np.zeros(assignments.shape)
+        for index,feature in enumerate(features):
+            dist = np.sum((centers - feature)**2,axis=1)
+            new_assignments[index] = np.argmin(dist)
+
+        for i in range(k):
+            values = features[np.where(new_assignments==i)]
+            centers[i] = np.sum(values, axis=0)/values.shape[0]
+
+        if np.all(new_assignments == assignments):
+            break
+        assignments = new_assignments
         ### END YOUR CODE
 
     return assignments
@@ -81,7 +92,16 @@ def kmeans_fast(features, k, num_iters=100):
 
     for n in range(num_iters):
         ### YOUR CODE HERE
-        pass
+        dist = np.sum((np.repeat(features, k, axis=0).reshape((N,k,D)) - centers)**2,axis=2)
+        new_assignments = np.argmin(dist,axis=1)
+
+        for i in range(k):
+            values = features[np.where(new_assignments==i)]
+            centers[i] = np.sum(values, axis=0)/values.shape[0]
+
+        if np.all(new_assignments == assignments):
+            break
+        assignments = new_assignments
         ### END YOUR CODE
 
     return assignments
@@ -133,7 +153,23 @@ def hierarchical_clustering(features, k):
 
     while n_clusters > k:
         ### YOUR CODE HERE
-        pass
+        dist_matrix = pdist(centers)
+        min_dist = min(dist_matrix)
+        dist_matrix = squareform(dist_matrix)
+        closest = np.where(dist_matrix==min_dist)[0]
+        assignments[np.where(assignments == closest[0])] = closest[0]
+        assignments[np.where(assignments == closest[1])] = closest[0]
+        clusters = 0
+        new_centers = np.zeros((n_clusters-1, D))
+        for i in range(n_clusters):
+            indices = np.where(assignments == i)[0]
+            if len(indices) > 0:
+                values = features[indices]
+                new_centers[clusters] = np.sum(values, axis=0)/values.shape[0]
+                assignments[indices] = clusters
+                clusters+=1
+        n_clusters = clusters
+        centers = new_centers
         ### END YOUR CODE
 
     return assignments
@@ -154,7 +190,11 @@ def color_features(img):
     features = np.zeros((H*W, C))
 
     ### YOUR CODE HERE
-    pass
+    n = 0
+    for i in range(H):
+        for j in range(W):
+            features[n] = img[i,j]
+            n+=1
     ### END YOUR CODE
 
     return features
@@ -183,7 +223,14 @@ def color_position_features(img):
     features = np.zeros((H*W, C+2))
 
     ### YOUR CODE HERE
-    pass
+    n=0
+    for i in range(H):
+        for j in range(W):
+            features[n] = np.concatenate((color[i,j],np.array([j,i])))
+            n+=1
+    mean = np.mean(features,axis=0)
+    std = np.std(features, axis=0)
+    features = (features-mean)/std
     ### END YOUR CODE
 
     return features
@@ -199,7 +246,32 @@ def my_features(img):
     """
     features = None
     ### YOUR CODE HERE
-    pass
+    """
+    Convert rgb to hsv
+    """
+    features_rgb = color_features(img)/255
+    f_max = np.max(features_rgb,axis=1)
+    f_min = np.min(features_rgb,axis=1)
+    delta = f_max - f_min 
+
+    features = np.zeros(features_rgb.shape)
+    for i in range(features_rgb.shape[0]):
+        if delta[i] == 0:
+            features[i][0] = 0
+        elif f_max[i] == features_rgb[i][0]:
+            features[i][0] = (60*(features_rgb[i][1]-features_rgb[i][2])/delta[i] +360)%360
+        elif f_max[i] == features_rgb[i][1]:
+            features[i][0] = (60*(features_rgb[i][2]-features_rgb[i][0])/delta[i] +120)%360
+        else:
+            features[i][0] = (60*(features_rgb[i][0]-features_rgb[i][1])/delta[i] +240)%360
+        
+        if f_max[i] == 0:
+            features[i][1] = 0
+        else:
+            features[i][1] = delta[i]/f_max[i]*100
+
+    features[:,2] = f_max*100
+
     ### END YOUR CODE
     return features
 
@@ -223,7 +295,7 @@ def compute_accuracy(mask_gt, mask):
 
     accuracy = None
     ### YOUR CODE HERE
-    pass
+    accuracy = np.sum(mask == mask_gt)/(mask.shape[0]*mask.shape[1])
     ### END YOUR CODE
 
     return accuracy
